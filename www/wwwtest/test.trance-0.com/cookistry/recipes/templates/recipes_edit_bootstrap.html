@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Edit recipe</title>
+    <meta charset="UTF-8">
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+</head>
+
+<body>
+    <!-- jquery part, not required for all template -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <!-- Code to locate last change, reference:https://stackoverflow.com/questions/34765191/django-render-with-anchor -->
+    <!-- {{anchor}}
+    {% if anchor %}
+    <script src="{% static 'locateAnchor.js' %}"></script>
+    {% endif %} -->
+
+    {% include "navbar.html" %}
+
+    <!-- Delete recipe model, reference: https://github.com/cse330-summer-2023/module3-group-trance-0/blob/master/home/ec2-user/public_html/m3/news/index.php-->
+    <div class="modal fade" id="deleteRecipeModalToggle" aria-hidden="true"
+        aria-labelledby="deleteRecipeModalToggleLabel" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="deleteRecipeModalToggleLabel">Warning</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>
+                        Are you sure you are going to remove the mapping of order of electrons on my disk repersenting
+                        your recipe <strong>{{ recipe_form.instance.name }}</strong> permanently? (at least 13.787±0.020
+                        billion
+                        years)
+                    </p>
+                    <form action="{% url 'recipes:delete_recipe' pk %}" method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="doubleCheck_id" class="form-label">Enter the title name to confirm</label>
+                            <input type="text" name="doubleCheck" class="form-control" id="doubleCheck_id"
+                                placeholder="{{ recipe_form.instance.name }}" required>
+                            {% if recipe_form.instance.name|length > 15 %}
+                            <div class="form-text">That's also why you should have a short title.</div>
+                            {% endif %}
+                        </div>
+                        <button class="btn btn-danger" type="submit">Delete recipe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main class="container mt-3">
+        <form action="{% url 'recipes:edit_recipe' pk %}" enctype="multipart/form-data" method="post">
+            {% csrf_token %}
+            <div class="card">
+                {% if recipe_form.instance.picture and recipe_form.instance.picture.url%}
+                <img src="{{recipe_form.instance.picture.url }}" class="card-img-top" style="width:100%; height: auto;"
+                    alt="picture of {{ recipe_form.instance.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h1>Edit recipe</h1>
+                    <!-- Django overkill form -->
+                    {% for field in recipe_form %}
+
+                    <div class="mt-3">
+                        {%if field.errors%}
+                        <div class="alert alert-danger">
+                            {% for error in field.errors %}
+                            {{ error }}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        <label for="{{ field.id_for_label }}" class="form-label">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <div class="row justify-content-between align-items-center mt-3">
+                        <div class="col-auto">
+                            <input class="btn btn-primary" type="submit" value="Save">
+                        </div>
+                        <div class="col-auto">
+                            <!-- Nice link! -->
+                            <a class="btn btn-danger" data-bs-target="#deleteRecipeModalToggle"
+                                data-bs-toggle="modal">Delete Recipe</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formset customize requirement -->
+            {{ procedure_formsets.management_form }}
+
+            <div class="d-grid gap-2">
+                <button id="procedure-0" class="btn btn-primary mt-3" type="submit" name="add_procedure" value="0">Add
+                    procedure here</button>
+            </div>
+
+            {% for form in procedure_formsets %}
+            <div class="card mt-3">
+                <div class="card-body">
+                    <div class="row">
+                        {{ form.id }}
+                        {% for field in form %}
+                        <!-- skip id form -->
+                        {% if field.name != 'id' %}
+                        <div
+                            class="{% if field.name == 'minutes_required'%}col-4{% elif field.name == 'notes' %} col-12 {% else %}col-6{% endif %} mb-3">
+                            {% if field.errors %}
+                            <div class="alert alert-danger">
+                                {% for error in field.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text|safe }}</div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2">
+                <button id="procedure-{{form.instance.order}}" class="btn btn-primary mt-3" type="submit"
+                    name="add_procedure" value="{{form.id.value}}">Add procedure here</button>
+            </div>
+            {% endfor %}
+            <div class="card mt-3 mb-3">
+                <div class="card-body">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-auto">
+                            <input class="btn btn-primary" type="submit" value="Save">
+                        </div> 
+                        <div class="col-auto">
+                            <button class="btn btn-primary" type="submit" name="save_and_view" value="True">Save and view</button>
+                        </div>
+                    </div>
+                    <div class="form-text">This save button is used to help you save when you don't want to scroll up</div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+</body>
+
+<!-- TODO: create footer here -->

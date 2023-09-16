@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Cookistry list</title>
+    <meta charset="UTF-8">
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    {% if user.is_authenticated %}
+    <main class="container mt-3">
+        <div class="row g-2">
+            <div class="col-md-8 mt-3">
+                <!-- Stylize Login form, since we are in member directory, we don't need to specify members namespace -->
+                {% for recipe in recipes %}
+                <div class="card mb-3">
+                    {% if recipe.picture %}
+                    <img src="{{recipe.picture.url }}" class="card-img-top" style="width:100%; height: auto;"
+                        alt="picture of {{ recipe.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-auto">
+                                <h5 class="card-title">
+                                    {{ recipe.name }},
+                                    <span class="text-success">
+                                        by {{ recipe.owner_id.user_id.username}}
+                                    </span>
+                                </h5>
+                            </div>
+                            <div class="col-auto">
+                                <h5 class="card-title">
+                                    <span class="text-warning">
+                                        {{recipe.score|floatformat }}
+                                    </span>
+                                </h5>
+                            </div>
+                        </div>
+                        <p class="card-text">{{ recipe.description}}</p>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <p class="card-text">Estimate time: {{ recipe.estimate_time}} min</p>
+                            </div>
+                            <div class="col-md-4 ">
+                                <p class="card-text">Ingredients:
+                                    {% for i,amount,unit in recipe.ingredients_list%}
+                                    {{i}}
+                                    {% endfor %}</p>
+                            </div>
+                            <div class="col-md-4 ">
+                                <p class="card-text">Cookware:
+                                    {% for i in recipe.cookware_list%}
+                                    {{i}}
+                                    {% endfor %}</p>
+                            </div>
+                            <div class="col-md-12">
+                                <a class="btn btn-primary" href="{% url 'recipes:get_recipe' recipe.id %}">View
+                                    Detail</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- Sidebar -->
+            <aside class="col-md-4 blog-sidebar mt-3">
+                <div class="p-3 mb-3 bg-light rounded">
+                    <h4 class="font-italic">Hi, {{user.username}}</h4>
+                    <p class="mb-0"> There is no data for now.</p>
+                </div>
+
+                <div class="p-3 mb-3 bg-light rounded">
+                    <h4 class="font-italic">Recent reviews</h4>
+                    {% for review in reviews%}
+                    <!-- This safe attribute would tell djanogo that you can render it as html -->
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title">For <a class="text-secondary"
+                                    href="{% url 'recipes:get_recipe' review.recipe_id.pk %}">{{review.recipe_id.name}}</a>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Rating: {{review.score}}</h6>
+                            <div class="card-text">
+                                {{review.content}}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-auto">
+                                    {{review.created}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </aside>
+        </div>
+    </main>
+    {% else %}
+    <section class="py-5 text-center container">
+        <div class="row py-lg-5">
+            <div class="col-lg-6 col-md-8 mx-auto">
+                <h3 class="fw-light">Cookistry</h3>
+                <p class="lead text-body-secondary">Please login to access the contents.
+                <p class="lead text-body-secondary">Blank page code from <a
+                        href="https://getbootstrap.com/docs/5.3/examples/album/">Bootstrap</a>
+                </p>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+</body>
+
+<!-- TODO: create footer here -->

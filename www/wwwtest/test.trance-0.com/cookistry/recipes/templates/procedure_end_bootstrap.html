@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Cookistry list</title>
+    <meta charset="UTF-8">
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    <main class="container mt-3">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="card-title">
+                    Procedure ends, please click the button below to return to procedure
+                </div>
+                <div class="col-md-12">
+                    <a class="btn btn-primary" href="{% url 'recipes:get_recipe' recipe.id %}">Back to
+                        recipe</a>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+
+<!-- TODO: create footer here -->

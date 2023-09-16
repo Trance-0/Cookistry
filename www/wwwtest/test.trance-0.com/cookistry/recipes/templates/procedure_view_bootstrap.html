@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Cookistry list</title>
+    <meta charset="UTF-8">
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    <main class="container mt-3">
+        <div class="row g-2">
+            <div class="col-md-8 mt-3">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <div class="row justify-content-between align-items-center">
+                            {% if cur_order > 0 %}
+                            <div class="col-auto">
+                                <a class="btn btn-primary"
+                                    href="{% url 'recipes:get_procedure' recipe.id cur_order|add:-1 %}">Previous</a>
+                            </div>
+                            {% else %}
+                            <div class="col-auto"></div>
+                            {% endif %}
+                            <div class="col-auto">
+                                <a class="btn btn-primary"
+                                    href="{% url 'recipes:get_procedure' recipe.id cur_order|add:1 %}">Next</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- jQuery timer test -->
+                <script type="text/javascript"
+                    src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+                <link rel="stylesheet" type="text/css" href="{%static 'css/jquery.countdown.css'%}">
+                <script type="text/javascript" src="{%static  'js/jquery.plugin.js'%}"></script>
+                <script type="text/javascript" src="{%static 'js/jquery.countdown.js'%}"></script>
+                <div id="pauseResume"></div>
+                <input type="hidden" value="{{ procedure.minutes_required}}" id="minutes" />
+                <div class="d-grid gap-2 mt-3 mb-3">
+                    <button id="pauseButton" class="btn btn-secondary">Pause</button>
+                </div>
+                <script type="text/javascript">
+                    let liftoffTime = new Date();
+                    let minutes = parseInt($('#minutes').val());
+                    liftoffTime.setMinutes(liftoffTime.getMinutes() + minutes);
+                    $('#pauseResume').countdown({ until: liftoffTime, format: 'HMS' });
+
+                    $('#pauseButton').click(function () {
+                        var pause = $(this).text() === 'Pause';
+                        $(this).text(pause ? 'Resume' : 'Pause');
+                        $('#pauseResume').countdown(pause ? 'pause' : 'resume');
+                    });
+
+                </script>
+                <!-- This safe attribute would tell djanogo that you can render it as html -->
+                {{procedure.as_card|safe}}
+
+            </div>
+            <!-- Sidebar -->
+            <aside class="col-md-4 blog-sidebar mt-3">
+                <!-- Recipe info -->
+                <div class="card mb-3">
+                    {% if recipe.picture %}
+                    <img src="{{recipe.picture.url }}" class="card-img-top" style="width:100%; height: auto;"
+                        alt="picture of {{ recipe.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.name }}, <span class="text-success">
+                                made by {{ recipe.owner_id.user_id.username}}</span></h5>
+                        <p class="card-text">{{ recipe.description}}</p>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <h5 class="card-title">Estimate time:</h5>
+                                <p class="card-text">{{ recipe.estimate_time}} min</p>
+                            </div>
+                            <div class="col-md-3 ">
+                                <h5 class="card-title"> Ingredients:</h5>
+                                {% for i,amount,unit in recipe.ingredients_list%}
+                                <p class="card-text">
+                                    {{i}}
+                                </p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3 ">
+                                <h5 class="card-title"> Cookwares:</h5>
+                                {% for i in recipe.cookware_list%}
+                                <p class="card-text">
+                                    {{i}}
+                                </p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-12">
+                                <a class="btn btn-primary" href="{% url 'recipes:get_recipe' recipe.id %}">Back to
+                                    recipe</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+
+<!-- TODO: create footer here -->

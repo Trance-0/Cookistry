@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Cookistry list</title>
+    <meta charset="UTF-8">
+    {% load static %}
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    <main class="container mt-3">
+        <div class="row g-2">
+            <div class="col-md-8 mt-3">
+                <div class="card mb-3">
+                    {% if recipe.picture %}
+                    <img src="{{recipe.picture.url }}" class="card-img-top" style="width:100%; height: auto;"
+                        alt="picture of {{ recipe.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.name }}, <span class="text-success">
+                                made by {{ recipe.owner_id.user_id.username}}</span></h5>
+                        <p class="card-text">{{ recipe.description}}</p>
+                        <div class="row g-2">
+                            <div class="col-md-3">
+                                <h5 class="card-title">Estimate time:</h5>
+                                <p class="card-text">{{ recipe.estimate_time}} min</p>
+                            </div>
+                            <div class="col-md-3 ">
+                                <h5 class="card-title"> Ingredients:</h5>
+                                {% for i,amount,unit in recipe.ingredients_list%}
+                                <p class="card-text">
+                                    {{i}}
+                                </p>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-3 ">
+                                <h5 class="card-title"> Cookwares:</h5>
+                                {% for i in recipe.cookware_list%}
+                                <p class="card-text">
+                                    {{i}}
+                                </p>
+                                {% endfor %}
+                            </div>
+                            {% if can_edit%}
+                            <div class="col-md-2">
+                                <a class="btn btn-primary" href="{% url 'recipes:edit_recipe' recipe.id %}">Edit</a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="d-grid gap-2 mb-3">
+                    <a class="btn btn-primary"
+                    href="{% url 'recipes:get_procedure' recipe.id 0 %}">Start card View</a>
+                </div>
+                {% for procedure in procedures%}
+                <!-- This safe attribute would tell djanogo that you can render it as html -->
+                {{procedure.as_card|safe}}
+                {% endfor %}
+            </div>
+            <!-- Sidebar -->
+            <aside class="col-md-4 blog-sidebar mt-3">
+                <!-- Add comment form -->
+                <div class="p-3 mb-3 bg-light rounded">
+                    {%if can_comment%}
+                    <form action="{% url 'recipes:add_review' pk %}" enctype="multipart/form-data" method="post">
+                        {% csrf_token %}
+                        <h4 class="col-8">Add Review</h4>
+                        <!-- Django overkill form -->
+                        {% for field in review_form %}
+                        <div class="{%if field.name == 'score' %}col-3{%else%}col-12{%endif%} mt-3">
+                            {%if field.errors%}
+                            <div class="alert alert-danger">
+                                {% for error in field.errors %}
+                                {{ error }}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            <label for="{{ field.id_for_label }}" class="form-label">
+                                {{ field.label }}
+                            </label>
+                            {{ field }}
+                            {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text|safe }}</div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        <input class="btn btn-primary mt-3" type="submit" value="Create">
+                    </form>
+                    {%else%}
+                    Please login before you can submit reviews
+                    {%endif%}
+                </div>
+
+                <!-- Comments -->
+                <div class="p-3 mb-3 bg-light rounded">
+                    <h4 class="font-italic">Reviews</h4>
+                    {% for review in reviews%}
+                    <!-- This safe attribute would tell djanogo that you can render it as html -->
+                    {{review.as_card|safe}}
+                    {% endfor %}
+                </div>
+            </aside>
+        </div>
+    </main>
+</body>
+
+<!-- TODO: create footer here -->

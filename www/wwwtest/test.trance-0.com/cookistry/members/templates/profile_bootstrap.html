@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+
+    {% load static %}
+
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+
+<body>
+
+    {% include "navbar.html" %}
+
+    <main class="container mt-3">
+        <div class="row g-2">
+            <div class="col-md-8 mt-3">
+                <!-- Render basic user info -->
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h2 class="card-title">User info</h2>
+                        <h5 class="card-title">Username</h5>
+                        <p>{{userinfo.user_id.username}}</p>
+                        <h5 class="card-title">Moto</h5>
+                        <p>{{userinfo.moto}}</p>
+                        <h5 class="card-title">Social link</h5>
+                        <p><a href="{{userinfo.social_link}}">{{userinfo.social_link}}</a></p>
+                        <h5 class="card-title">Total recipes count</h5>
+                        <p>{{recipes|length}}</p>
+                        <h5 class="card-title">Total reviews count</h5>
+                        <p>{{reviews|length}}</p>
+                        {% if can_edit%}
+                        <div class="col-md-2">
+                            <a class="btn btn-primary"
+                                href="{% url 'members:edit_profile' userinfo.user_id.username %}">Edit</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Render user recipes -->
+                <!-- Render user recent comments -->
+
+                <div class="p-3 mb-3 bg-light rounded">
+                    <h2 class="font-italic">Created Recipe</h2>
+                    {% for recipe in recipes %}
+                    <div class="card mt-3">
+                        {% if recipe.picture %}
+                        <img src="{{recipe.picture.url }}" class="card-img-top" style="width:100%; height: auto;"
+                            alt="picture of {{ recipe.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.name }} </h5>
+                            <p class="card-text">{{ recipe.description}}</p>
+                            <div class="row g-2">
+                                <div class="col-md-3">
+                                    <p class="card-text">Estimate time: {{ recipe.estimate_time}} min</p>
+                                </div>
+                                <div class="col-md-4 ">
+                                    <p class="card-text">Ingredients:
+                                        {% for i,amount,unit in recipe.ingredients_list%}
+                                        {{i}}
+                                        {% endfor %}</p>
+                                </div>
+                                <div class="col-md-4 ">
+                                    <p class="card-text">Cookware: {% for i in recipe.cookware_list%}
+                                        {{i}}
+                                        {% endfor %}
+                                    </p>
+                                </div>
+                                <div class="col-md-12">
+                                    <a class="btn btn-primary" href="{% url 'recipes:get_recipe' recipe.id %}">View
+                                        Detail</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Sidebar -->
+            <aside class="col-md-4 blog-sidebar mt-3">
+                <!-- Comments -->
+                <div class="p-3 mb-3 bg-light rounded">
+                    <h4 class="font-italic">Recent reviews</h4>
+                    {% if can_edit%}
+                    <form action="{% url 'members:edit_reviews' userinfo.user_id.username %}" method="post">
+                        {% csrf_token %}
+                        <!-- Formset customize requirement -->
+                        {{ review_formsets.management_form }}
+                        <div class="d-grid gap-2">
+                            <button id="procedure-0" class="btn btn-primary mt-3" type="submit">Save changes</button>
+                        </div>
+                        {% for form in review_formsets %}
+                        <div class="card mt-3">
+                            <div class="card-body">
+                                <h5 class="card-title">For <a class="text-secondary"
+                                        href="{% url 'recipes:get_recipe' form.instance.recipe_id.pk %}">{{form.instance.recipe_id.name}}</a>
+                                </h5>
+                                {% for field in form %}
+                                <!--  fill id in the begining -->
+                                {{ form.id }}
+                                {% if field.name != 'id' %}
+                                <div class="mt-3">
+                                    {%if field.errors%}
+                                    <div class="alert alert-danger">
+                                        {% for error in field.errors %}
+                                        {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <label for="{{ field.id_for_label }}" class="form-label">
+                                        {{ field.label }}
+                                    </label>
+                                    {{ field }}
+                                    {% if field.help_text %}
+                                    <div class="form-text">{{ field.help_text|safe }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </form>
+                    {% else %}
+                    {% for review in reviews%}
+                    <!-- This safe attribute would tell djanogo that you can render it as html -->
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <h5 class="card-title">For <a class="text-secondary"
+                                    href="{% url 'recipes:get_recipe' review.recipe_id.pk %}">{{review.recipe_id.name}}</a>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-body-secondary">Rating: {{review.score}}</h6>
+                            <div class="card-text">
+                                {{review.content}}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-auto">
+                                    {{review.created}}
+                                </div>
+                                {% if can_edit %}
+                                <div class="col-auto">
+                                    <a class="btn btn-danger"
+                                        href="{% url 'recipes:delete_review' review.id %}">Delete</a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </aside>
+        </div>
+    </main>
+
+</body>
+
+<!-- TODO: create footer here -->
