@@ -1,0 +1,35 @@
+version: '0.8'
+
+volumes:
+  postgres-data:
+  cookistry-data:
+networks:
+  cookistry-back:
+
+services:
+  app:
+    image: trancezero/cookistry:v0.8
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: gunicorn cookistry.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - cookistry-data:/usr/src/app/
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+    networks:
+      - cookistry-back
+  db:
+    image: postgres:15
+    volumes:
+      - postgres-data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=${POSTGRE_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRE_PASSWORD}
+      - POSTGRES_DB=${POSTGRE_HOST}
+    ports:
+      - 5433:5432
+    networks:
+      - cookistry-back
