@@ -136,12 +136,12 @@ USE_TZ = True
 Correct way to add static file is put them to /staticfiles folder and do `python3 manage.py collectstatic`
 then use the directory in /productionfiles to call in static statements
 """
-STATIC_ROOT = BASE_DIR / 'productionfiles'
+STATIC_ROOT = os.path.join(BASE_DIR, 'productionfiles')
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR / 'staticfiles'
+    os.path.join(BASE_DIR, 'staticfiles')
 ]
 
 # Image files (jpg, jpeg)
